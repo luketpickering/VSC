@@ -152,6 +152,14 @@ function vector:normalized()
 	return self:clone():normalizeInplace()
 end
 
+function vector:floor()
+	return new(math.floor(self.x),math.floor(self.y))
+end
+
+function vector:ceil()
+	return new(math.ceil(self.x),math.ceil(self.y))
+end
+
 function vector:rotateInplace(phi)
 	local c, s = cos(phi), sin(phi)
 	self.x, self.y = c * self.x - s * self.y, s * self.x + c * self.y

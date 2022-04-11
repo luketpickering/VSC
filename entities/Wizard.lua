@@ -5,7 +5,7 @@ local vector = require "hump/vector"
 require "graphics/Graphics"
 
 Wizard = Player:new { 
-  maxVel = 10
+  maxVel = 50
 }
 
 function Wizard:init(world, pos)
@@ -29,4 +29,11 @@ end
 
 function Wizard:Draw()
   Graphics:DrawTilesetQuad(self.quad, self:GetPos():unpack())
-end
+
+  Graphics:PushColor({1,1,0})
+  love.graphics.points(self.body:getX(), self.body:getY())
+  love.graphics.rectangle("line",
+    self.body:getX() - Assets.size/2, self.body:getY() - Assets.size/2, 
+    Assets.size, Assets.size)
+  Graphics:PopColor()
+end 

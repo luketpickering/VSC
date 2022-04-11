@@ -13,6 +13,7 @@ Joystick = Object:new{
                   },
   analog1D = {"triggerleft", "triggerright"},
   analog_granularity = 20,
+  analog2D_deadzone = 0.2,
   Recievers = {}
 }
 
@@ -102,17 +103,18 @@ function Joystick:Poll()
   end
 
   for i, axis in ipairs(self.analog2D) do
-    local vec = vector(
-      math.floor(self.cjoy:getGamepadAxis(self.analog2D_axes[i][1])
-        *self.analog_granularity)/self.analog_granularity,
-      math.floor(self.cjoy:getGamepadAxis(self.analog2D_axes[i][2])
-        *self.analog_granularity)/self.analog_granularity)
+    local vec_raw = vector(
+      self.cjoy:getGamepadAxis(self.analog2D_axes[i][1]),
+      self.cjoy:getGamepadAxis(self.analog2D_axes[i][2]))
+
+    if vec_raw:len() < self.analog2D_deadzone then
+      vec_raw = vector(0,0)
+    end
+
+    local vec = (vec_raw * self.analog_granularity):floor()/self.analog_granularity
 
     if not (vec == self.analog2D_values[i]) then
-      if vec:len2() < 1.0/(self.analog_granularity*self.analog_granularity) then
-        vec = vector(0,0)
-      end
-
+      io.write(string.format("Raw input = %s, discretized = %s\n", vec_raw, vec))
       self.analog2D_values[i] = vec
       self:SendInput(axis, vec)
     end

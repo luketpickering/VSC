@@ -14,6 +14,10 @@ function Player:GetPos()
     self.body:getY())
 end
 
+function Player:GetVel()
+  return vector(self.body:getLinearVelocity())
+end
+
 function Player:Draw()
   io.write("Base class Player:Draw called")
   os.exit()

@@ -3,7 +3,10 @@ require "Object"
 Assets = Object:new()
 
 function Assets:init()
-  self.ts = love.graphics.newImage("assets/colored-transparent.png")
+  self.ts = love.graphics.newImage("assets/kenney/colored-transparent.png")
+  self.Font = {}
+  self.Font[12] = love.graphics.newFont("assets/kenney/kenney_blocks.ttf", 12)
+  self.Font[20] = love.graphics.newFont("assets/kenney/kenney_blocks.ttf", 20)
   self.size = 16
   self.padding = 1
 

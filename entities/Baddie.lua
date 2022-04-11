@@ -29,4 +29,11 @@ end
 
 function Baddie:Draw()
   Graphics:DrawTilesetQuad(self.quad, self:GetPos():unpack())
+
+  Graphics:PushColor({0,1,1})
+  love.graphics.points(self.body:getX(), self.body:getY())
+  love.graphics.rectangle("line",
+    self.body:getX() - Assets.size/2, self.body:getY() - Assets.size/2, 
+    Assets.size, Assets.size)
+  Graphics:PopColor()
 end

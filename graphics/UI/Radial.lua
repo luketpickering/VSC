@@ -1,5 +1,7 @@
 require "graphics/UI/UI"
 
+require "graphics/Graphics"
+
 Radial = UI:new{ 
   x = 0, 
   y = 0,
@@ -14,19 +16,28 @@ function Radial:Draw()
   gx.push()
   gx.translate(self.x + self.r, self.y + self.r)
 
-  local r, g, b, a = gx.getColor()
-  gx.setColor(self.bc)
+  Graphics:PushColor(self.bc)
   gx.circle("fill", 0, 0, self.r)
 
   gx.push()
   gx.rotate(self.v.th)
   gx.translate(self.v.r*self.r,0)
-  gx.setColor(self.fc)
+  Graphics:PushColor(self.fc)
   gx.circle("fill", 0, 0, self.r/3)
+
+  Graphics:PopColor()
+  Graphics:PopColor()
+
   gx.pop()
 
-  gx.setColor(r, g, b, a)
+  local x = self.v.r * math.cos(self.v.th)
+  local y = self.v.r * math.sin(self.v.th)
+
+  Graphics:Print(string.format("(%.2f,%.2f)", 
+    x, y), 0, -self.r - 12)
+
   gx.pop()
+
 end
 
 function Radial:Set(v)
