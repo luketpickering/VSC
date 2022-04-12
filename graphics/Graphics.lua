@@ -57,3 +57,16 @@ function Graphics:PrintLeft(t, x, y, s)
     abort()
   end
 end
+
+function Graphics:PrintRight(t, x, y, s)
+  s = s and s or 12
+  local f = Assets.Font[s]
+
+  if f then
+    local textWidth = f:getWidth(t)
+    self:Print(t, x - textWidth/2, y, s)
+  else
+    io.write("[ERROR]: No font in size ", s)
+    abort()
+  end
+end

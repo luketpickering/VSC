@@ -21,9 +21,9 @@ function Camera:init(pos, zoom)
 end
 
 function Camera:Command(command, value)
-  if command == "right" then
+  if command == "move_camera" then
     self.target_displacement = value * self.max_displacement
-  elseif command == "triggerright" then
+  elseif command == "zoom" then
     self.target_zoom = 2 - 1.2*value
   end
 end

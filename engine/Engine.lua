@@ -8,10 +8,9 @@ require "graphics/Background"
 
 require "graphics/UI/Radial"
 
-require "control/Joystick"
+require "control/Control"
 
 require "entities/Control_Print"
-require "entities/Control_Draw"
 require "entities/Wizard"
 require "entities/Baddie"
 
@@ -30,43 +29,46 @@ function Engine:init()
   self.window = {}
   self.window.width, self.window.height, self.window.flags = love.window.getMode()
 
-  Joystick:init()
+  Control:init()
   Graphics:init()
   Background:init()
 
-  self.left_stick_overlay = Radial:new{
-    x = 50, 
-    y = self.window.height-70,
-    r = 30,
-    v = {r=0, th=0},
-    bc = {1,1,1,0.4}, 
-    fc = {1,0,0,0.7},
-    Command = function(self, command, value)
-      self:Set(value)
-    end
-  }
+  if Control.itype == "joystick" then
+    self.left_stick_overlay = Radial:new{
+      x = 50, 
+      y = self.window.height-70,
+      r = 30,
+      v = {r=0, th=0},
+      bc = {1,1,1,0.4}, 
+      fc = {1,0,0,0.7},
+      Command = function(self, command, value)
+        self:Set(value)
+      end
+    }
 
-  self.right_stick_overlay = Radial:new{
-    x = self.window.width - 70, 
-    y = self.window.height-70,
-    r = 30,
-    v = {r=0, th=0},
-    bc = {1,1,1,0.4}, 
-    fc = {0,0,1,0.7},
-    Command = function(self, command, value)
-      self:Set(value)
-    end
-  }
+    self.right_stick_overlay = Radial:new{
+      x = self.window.width - 70, 
+      y = self.window.height-70,
+      r = 30,
+      v = {r=0, th=0},
+      bc = {1,1,1,0.4}, 
+      fc = {0,0,1,0.7},
+      Command = function(self, command, value)
+        self:Set(value)
+      end
+    }
+
+    Control:Register(self.left_stick_overlay, "left")
+    Control:Register(self.right_stick_overlay, "right")
+  end
 
   Wizard:init(self.World)
   Camera:init(Wizard:GetPos(), self.sprite_scale)
 
-  Joystick:RegisterInputtable(Wizard, "left")
-  Joystick:RegisterInputtable(self.left_stick_overlay, "left")
-  Joystick:RegisterInputtable(self.right_stick_overlay, "right")
-  Joystick:RegisterInputtable(Camera, {"right", "triggerright"})
-  Joystick:RegisterInputtable(Control_Print, "all")
-  Joystick:RegisterInputtable(Control_Draw, "all")
+  Control:Register(Wizard, {"move", "rewind"} )
+
+  Control:Register(Camera, {"move_camera", "zoom"})
+  Control:Register(Control_Print, "all")
 
   Baddie:init(self.World, vector(50,50))
 end
@@ -77,8 +79,8 @@ function love.update(dt)
   Baddie:Command()
   Baddie:Update()
 
-  Joystick:Poll()
-  Wizard:Update()
+  Control:Poll()
+  Wizard:Update(dt)
   Camera:Update(dt, Wizard:GetPos())
 
 end
@@ -94,7 +96,8 @@ end
 function love.draw()
   Camera:Attach()
   Background:Draw(Wizard:GetPos(), 
-    Wizard:GetPos() - vector(Engine.window.width/(2*Engine.sprite_scale),Engine.window.height/(2*Engine.sprite_scale)))
+    Wizard:GetPos() - vector(Engine.window.width/(2*Engine.sprite_scale),
+    Engine.window.height/(2*Engine.sprite_scale)))
 
   Wizard:Draw()
   Baddie:Draw()
@@ -114,8 +117,10 @@ function love.draw()
     Wizard_pos_screen.x + 24, Wizard_pos_screen.y)
   Graphics:PopColor()
 
-  Engine.left_stick_overlay:Draw()
-  Engine.right_stick_overlay:Draw()
+  if Engine.left_stick_overlay then
+    Engine.left_stick_overlay:Draw()
+    Engine.right_stick_overlay:Draw()
+  end
 
   local vstart_cam = vector(100 ,10)
   local vworld_start = Camera:WorldCoords(vstart_cam)
@@ -131,5 +136,8 @@ function love.draw()
   midline.y = midline.y + 10
   Graphics:Print(string.format("10m = %spx", 
     math.floor(vend_cam.x - vstart_cam.x + 0.5)), midline:unpack())
+
+  Graphics:PrintRight(string.format("Input: %s", Control.itype), 
+    Engine.window.width - 20, 20)
 
 end
