@@ -19,11 +19,14 @@ end
 function Baddie:Update()
 end
 
+-- fix baddie movement to be not force based.
 function Baddie:Command(command, value)
   if self.body:getLinearVelocity() < self.maxVel then
     local pdir = (Wizard:GetPos() - self:GetPos())
     pdir:normalizeInplace()
     self.body:applyForce(pdir:unpack())
+
+    self:StoreMove(value * self.maxVel)
   end  
 end
 
