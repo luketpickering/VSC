@@ -70,14 +70,14 @@ function Engine:init()
   Control:Register(Camera, {"move_camera", "zoom"})
   Control:Register(Control_Print, "all")
 
-  Baddie:init(self.World, vector(50,50))
+  -- Baddie:init(self.World, vector(50,50))
 end
 
 function love.update(dt)
   Engine.World:update(dt)
 
-  Baddie:Command()
-  Baddie:Update()
+  -- Baddie:Command()
+  -- Baddie:Update()
 
   Control:Poll()
   Wizard:Update(dt)
@@ -100,7 +100,7 @@ function love.draw()
     Engine.window.height/(2*Engine.sprite_scale)))
 
   Wizard:Draw()
-  Baddie:Draw()
+  -- Baddie:Draw()
 
   -- Draw the origin
   Graphics:PushColor({1,0,0})
@@ -139,5 +139,27 @@ function love.draw()
 
   Graphics:PrintRight(string.format("Input: %s", Control.itype), 
     Engine.window.width - 20, 20)
+
+  Graphics:PushColor({1,0,0})
+  love.graphics.rectangle("line", 20, Engine.window.height - 40, 
+    Engine.window.width * 0.8 , 5)
+
+  love.graphics.rectangle("fill", 20, Engine.window.height - 40, 
+    (Engine.window.width * 0.8) * 
+      Wizard.fine_displacement_history:Size() /
+        Wizard.fine_displacement_history.capacity, 
+    5)
+
+  Graphics:PopColor()
+  Graphics:PushColor({0,0,1})
+  love.graphics.rectangle("line", 20, Engine.window.height - 20, 
+    Engine.window.width * 0.8 , 5)
+
+  love.graphics.rectangle("fill", 20, Engine.window.height - 20, 
+    (Engine.window.width * 0.8) * 
+      Wizard.coarse_displacement_history:Size() /
+        Wizard.coarse_displacement_history.capacity, 
+    5)
+  Graphics:PopColor()
 
 end
