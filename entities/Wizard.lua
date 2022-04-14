@@ -11,18 +11,19 @@ Wizard = Character:new {
 }
 
 function Wizard:Command(command, value)
-  io.write(string.format("Wizard Recieving: %s, %s", 
-    Commands.tostring(command), value), "\n")
 
-  if (command == Commands.MOVE) 
-    and (self.state == DynamicBodyStates.ALIVE_RECORDING) then
-    self.body:setLinearVelocity( (value * self.maxVel):unpack() )
-  elseif command == Commands.REWIND then
-    self.next_state = (value > 0) and 
-          DynamicBodyStates.REWINDING or
-          DynamicBodyStates.ALIVE_RECORDING
+  if self.state < DynamicBodyStates.READY_FOR_GC then
+    
+    if (command == Commands.MOVE) 
+      and (self.state == DynamicBodyStates.ALIVE_RECORDING) then
+      self.body:setLinearVelocity( (value * self.maxVel):unpack() )
+    elseif command == Commands.REWIND then
+      self.next_state = (value > 0) and 
+            DynamicBodyStates.REWINDING or
+            DynamicBodyStates.ALIVE_RECORDING
+    end
+
   end
-
 end
 
 function Wizard:Draw()

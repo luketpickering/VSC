@@ -12,6 +12,7 @@ require "control/Control"
 
 require "entities/Control_Print"
 require "entities/Wizard"
+require "entities/Baddie"
 
 Engine = Object:new{
   sprite_scale = 2,
@@ -60,22 +61,46 @@ function Engine:init()
     Control:Register(self.right_stick_overlay, Commands.MOVE_CAMERA)
   end
 
+  self.Baddies = {}
+
+  for i = 1, 10 do
+    self.Baddies[i] = Baddie:new{}
+    self.Baddies[i]:init(self.World, 
+      Assets:GetCharacterAssets(25, 3),
+      vector.randomDirection(100,200))
+    self.Baddies[i].next_state = DynamicBodyStates.ALIVE_RECORDING
+    AI:Attach(self.Baddies[i])
+  end 
+
   Wizard:init(self.World, Assets:GetCharacterAssets(25, 4))
+  Wizard.next_state = DynamicBodyStates.ALIVE_RECORDING
+
   Camera:init(Wizard:GetPos(), self.sprite_scale)
 
   Control:Register(Wizard, {Commands.MOVE, Commands.REWIND} )
+  Control:Register(AI, {Commands.REWIND} )
 
   Control:Register(Camera, {Commands.MOVE_CAMERA, Commands.ZOOM})
   Control:Register(Control_Print, Commands.ANY)
+end
 
+function Engine:Update(dt)
+  self.World:update(dt)
+
+  Control:Poll()
+
+  Wizard:Update(dt)
+
+  Camera:Update(dt, Wizard:GetPos())
+
+  AI:Update(Wizard)
+  for i = 1, 10 do
+    self.Baddies[i]:Update(dt)
+  end
 end
 
 function love.update(dt)
-  Engine.World:update(dt)
-
-  Control:Poll()
-  Wizard:Update(dt)
-  Camera:Update(dt, Wizard:GetPos())
+  Engine:Update(dt)
 end
 
 function Engine:pxtom(px)
@@ -93,6 +118,10 @@ function love.draw()
     Engine.window.height/(2*Engine.sprite_scale)))
 
   Wizard:Draw()
+
+  for _,b in pairs(Engine.Baddies) do
+    b:Draw()
+  end
 
   -- Draw the origin
   Graphics:PushColor({1,0,0})

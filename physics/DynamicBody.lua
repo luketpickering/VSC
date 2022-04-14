@@ -4,12 +4,26 @@ require "utils/ringbuffer"
 local vector = require "hump/vector"
 
 DynamicBodyStates = {
-  UNITINIALIZED = 0,
   ALIVE_RECORDING = 1,
-  REWINDING = 2,
-  DEAD = 3,
-  READY_FOR_GC = 4,
+  ALIVE = 2,
+  REWINDING = 3,
+  DEAD = 4,
+  READY_FOR_GC = 5,
+  UNITINIALIZED = 6,
 }
+
+DynamicBodyStates_rev = {
+  "UNITINIALIZED",
+  "ALIVE_RECORDING",
+  "ALIVE",
+  "REWINDING",
+  "DEAD",
+  "READY_FOR_GC",
+}
+
+function DynamicBodyStates.tostring(state)
+  return DynamicBodyStates_rev[state]
+end
 
 local DynamicBodySnapshot = Object:new{
   state = DynamicBodyStates.UNITINIALIZED,

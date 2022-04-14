@@ -9,7 +9,7 @@ function Character:init(world, character_assets, pos)
   pos = pos or vector()
 
   DynamicBody.init(self, love.physics.newBody(world, pos.x, pos.y, "dynamic"))
-
+  
   self.quad = character_assets.quad
   self.shape = love.physics.newRectangleShape(character_assets.size, 
     character_assets.size)

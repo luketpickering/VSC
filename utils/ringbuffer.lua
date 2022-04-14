@@ -1,7 +1,6 @@
 require "Object"
 
-RingBuffer = Object:new{
-}
+RingBuffer = Object:new{}
 
 function RingBuffer:init(capacity)
   self.buf = {}
@@ -9,7 +8,6 @@ function RingBuffer:init(capacity)
   self.tail = 1
 
   self.capacity = capacity
-  console.print(self)
 end
 
 -- Adds an item to the end of the buffer, replacing the current last item if the
