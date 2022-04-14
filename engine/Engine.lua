@@ -12,15 +12,13 @@ require "control/Control"
 
 require "entities/Control_Print"
 require "entities/Wizard"
-require "entities/Baddie"
 
 Engine = Object:new{
+  sprite_scale = 2,
+  world_scale = 16 --px/m
 }
 
 function Engine:init()
-  
-  self.sprite_scale = 2
-  self.world_scale = 16 --px/m
 
   love.physics.setMeter(Engine.world_scale)
 
@@ -33,10 +31,10 @@ function Engine:init()
   Graphics:init()
   Background:init()
 
-  if Control.itype == "joystick" then
+  if Control.itype == ControlTypes.JOYSTICK then
     self.left_stick_overlay = Radial:new{
       x = 50, 
-      y = self.window.height-70,
+      y = self.window.height - 70,
       r = 30,
       v = {r=0, th=0},
       bc = {1,1,1,0.4}, 
@@ -48,7 +46,7 @@ function Engine:init()
 
     self.right_stick_overlay = Radial:new{
       x = self.window.width - 70, 
-      y = self.window.height-70,
+      y = self.window.height - 70,
       r = 30,
       v = {r=0, th=0},
       bc = {1,1,1,0.4}, 
@@ -58,31 +56,26 @@ function Engine:init()
       end
     }
 
-    Control:Register(self.left_stick_overlay, "left")
-    Control:Register(self.right_stick_overlay, "right")
+    Control:Register(self.left_stick_overlay, Commands.MOVE)
+    Control:Register(self.right_stick_overlay, Commands.MOVE_CAMERA)
   end
 
-  Wizard:init(self.World)
+  Wizard:init(self.World, Assets:GetCharacterAssets(25, 4))
   Camera:init(Wizard:GetPos(), self.sprite_scale)
 
-  Control:Register(Wizard, {"move", "rewind"} )
+  Control:Register(Wizard, {Commands.MOVE, Commands.REWIND} )
 
-  Control:Register(Camera, {"move_camera", "zoom"})
-  Control:Register(Control_Print, "all")
+  Control:Register(Camera, {Commands.MOVE_CAMERA, Commands.ZOOM})
+  Control:Register(Control_Print, Commands.ANY)
 
-  -- Baddie:init(self.World, vector(50,50))
 end
 
 function love.update(dt)
   Engine.World:update(dt)
 
-  -- Baddie:Command()
-  -- Baddie:Update()
-
   Control:Poll()
   Wizard:Update(dt)
   Camera:Update(dt, Wizard:GetPos())
-
 end
 
 function Engine:pxtom(px)
@@ -100,7 +93,6 @@ function love.draw()
     Engine.window.height/(2*Engine.sprite_scale)))
 
   Wizard:Draw()
-  -- Baddie:Draw()
 
   -- Draw the origin
   Graphics:PushColor({1,0,0})
@@ -137,7 +129,7 @@ function love.draw()
   Graphics:Print(string.format("10m = %spx", 
     math.floor(vend_cam.x - vstart_cam.x + 0.5)), midline:unpack())
 
-  Graphics:PrintRight(string.format("Input: %s", Control.itype), 
+  Graphics:PrintRight(string.format("Input: %s", ControlTypes.tostring(Control.itype)), 
     Engine.window.width - 20, 20)
 
   Graphics:PushColor({1,0,0})
@@ -146,8 +138,8 @@ function love.draw()
 
   love.graphics.rectangle("fill", 20, Engine.window.height - 40, 
     (Engine.window.width * 0.8) * 
-      Wizard.fine_displacement_history:Size() /
-        Wizard.fine_displacement_history.capacity, 
+      Wizard.fine_state_history:Size() /
+        Wizard.fine_state_history.capacity, 
     5)
 
   Graphics:PopColor()
@@ -157,8 +149,8 @@ function love.draw()
 
   love.graphics.rectangle("fill", 20, Engine.window.height - 20, 
     (Engine.window.width * 0.8) * 
-      Wizard.coarse_displacement_history:Size() /
-        Wizard.coarse_displacement_history.capacity, 
+      Wizard.coarse_state_history:Size() /
+        Wizard.coarse_state_history.capacity, 
     5)
   Graphics:PopColor()
 

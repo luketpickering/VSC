@@ -1,5 +1,7 @@
 require "Object"
 
+require "control/commands"
+
 local vector = require "hump/vector"
 
 Keyboard = Object:new{
@@ -33,7 +35,7 @@ function Keyboard:Poll()
 
   local state_changes = {}
 
-  local move_vec = vector(0,0)
+  local move_vec = vector()
   local move_state_change = false
 
   for i, key in ipairs(self.move_keys) do
@@ -50,10 +52,10 @@ function Keyboard:Poll()
   end
 
   if move_state_change then
-    table.insert(state_changes, {"move", move_vec:normalized()})
+    table.insert(state_changes, {Commands.MOVE, move_vec:normalized()})
   end
 
-  local move_camera_vec = vector(0,0)
+  local move_camera_vec = vector()
   local move_camera_state_change = false
 
   for i, key in ipairs(self.move_camera_keys) do
@@ -70,7 +72,7 @@ function Keyboard:Poll()
   end
 
   if move_camera_state_change then
-    table.insert(state_changes, {"move_camera", move_camera_vec:normalized()})
+    table.insert(state_changes, {Commands.MOVE_CAMERA, move_camera_vec:normalized()})
   end
 
   for i, key in ipairs(self.cmd_keys) do

@@ -1,36 +1,51 @@
 require "Object"
 
+require "control/commands"
 require "control/Joystick"
 require "control/Keyboard"
+
+ControlTypes = {
+  KEYBOARD = 1,
+  JOYSTICK = 2
+}
+
+ControlTypes_rev = {
+  "KEYBOARD",
+  "JOYSTICK"
+}
+
+function ControlTypes.tostring(type)
+  return ControlTypes_rev[type]
+end
 
 Control = Object:new{
 	Recievers = {},
   Controllable = {},
-  Translations = {}
+  Translations = {},
 }
 
 function Control:init(itype)
-  self.itype = itype or "keyboard"
+  self.itype = itype or ControlTypes.KEYBOARD
 
-  if self.itype == "keyboard" then
+  if self.itype == ControlTypes.KEYBOARD then
     self.Controllable = Keyboard:new{} 
     self.Translations = {
-      z = "zoom",
-      r = "rewind"
+      z = Commands.ZOOM,
+      r = Commands.REWIND
     }
-  elseif self.itype == "joystick" then
+  elseif self.itype == ControlTypes.JOYSTICK then
     self.Controllable = Joystick:new{}
     self.Translations = {
-      left = "move",
-      right = "move_camera",
-      triggerright = "zoom"
+      left = Commands.MOVE,
+      right = Commands.MOVE_CAMERA,
+      triggerright = Commands.ZOOM
     }
   end
 end
 
 function Control:Command(command, value)
-  if self.Recievers["all"] then
-    for _, r in ipairs(self.Recievers["all"]) do
+  if self.Recievers[Commands.ANY] then
+    for _, r in ipairs(self.Recievers[Commands.ANY]) do
       r:Command(command, value)
     end
   end
@@ -42,8 +57,8 @@ function Control:Command(command, value)
 end
 
 function Control:Register(obj, commands)
-  commands = commands or "all"
-  if type(commands) == "string" then
+  commands = commands or Commands.ANY
+  if type(commands) == "number" then
     self.Recievers[commands] = self.Recievers[commands] or {}
     table.insert(self.Recievers[commands], obj)
   elseif type(commands) == "table" then

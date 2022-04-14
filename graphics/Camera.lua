@@ -1,5 +1,7 @@
 require "Object"
 
+require "control/commands"
+
 require "utils/math"
 require "utils/console"
 
@@ -21,9 +23,9 @@ function Camera:init(pos, zoom)
 end
 
 function Camera:Command(command, value)
-  if command == "move_camera" then
+  if command == Commands.MOVE_CAMERA then
     self.target_displacement = value * self.max_displacement
-  elseif command == "zoom" then
+  elseif command == Commands.ZOOM then
     self.target_zoom = 2 - 1.2*value
   end
 end

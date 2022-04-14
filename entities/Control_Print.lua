@@ -1,6 +1,6 @@
-require "entities/Player"
+require "Object"
 
-Control_Print = Player:new{}
+Control_Print = Object:new{}
 
 function Control_Print:Command(command, value)
   if type(value) == "boolean" then
@@ -11,5 +11,3 @@ function Control_Print:Command(command, value)
   end
   io.flush()
 end
-
-function Control_Print:Draw() end

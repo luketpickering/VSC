@@ -20,3 +20,10 @@ function Assets:GetTilesetQuad(x, y)
     y*(self.size + self.padding), self.size, self.size, 
     self.ts_w, self.ts_h)
 end
+
+function Assets:GetCharacterAssets(x,y)
+  return {
+    quad = self:GetTilesetQuad(x,y),
+    size = self.size
+  }
+end
