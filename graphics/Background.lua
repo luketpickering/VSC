@@ -9,12 +9,12 @@ vector = require "hump/vector"
 Background = Object:new{}
 
 function Background:init()
-  self.leaves = Graphics:GetTilesetQuad(13, 6)
-  self.grass = Graphics:GetTilesetQuad(5, 0)
+  self.leaves = Assets:GetSprite("KENNEY_SPRITES",13, 6)
+  self.grass = Assets:GetSprite("KENNEY_SPRITES",5, 0)
 end
 
 function Background:Draw(world_pos, min_pos)
-  local tile_size = Assets.size
+  local tile_size = self.leaves.size
 
   local origin_tiles = (min_pos / tile_size):floor()
   local ntiles = (2 * (world_pos - min_pos)/tile_size):ceil()
@@ -24,9 +24,9 @@ function Background:Draw(world_pos, min_pos)
       local abspos = origin_tiles + vector(i,j) 
       local chooser = ((103*abspos.x + 83 * abspos.y) % 59)
       if chooser == 58 then
-        Graphics:DrawTilesetQuad(self.grass, (abspos*tile_size):unpack())
+        Graphics:DrawSprite(self.grass, (abspos*tile_size):unpack())
       elseif chooser == 57 then
-        Graphics:DrawTilesetQuad(self.leaves, (abspos*tile_size):unpack())        
+        Graphics:DrawSprite(self.leaves, (abspos*tile_size):unpack())        
       end
     end
   end

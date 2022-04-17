@@ -5,8 +5,14 @@ AI = Object:new{
 }
 
 AICommands = {
-  NOTIFY_TARGET = 1,
+  NOTIFY_TARGET = 1001,
 }
+local AICommands_rev = {}
+AICommands_rev[1001] = "NOTIFY_TARGET"
+
+function AICommands.tostring(c)
+  return AICommands_rev[c]
+end
 
 function AI:Attach(obj)
   table.insert(self.managed, obj)

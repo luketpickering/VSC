@@ -11,12 +11,10 @@ function Graphics:init()
   self.color_stack = {}
 end
 
-function Graphics:GetTilesetQuad(x, y)
-  return Assets:GetTilesetQuad(x, y)
-end
-
-function Graphics:DrawTilesetQuad(Q, x, y)
-  love.graphics.draw(Assets.ts, Q, x - Assets.size/2, y - Assets.size/2)
+function Graphics:DrawSprite(sprite, x, y)
+  local ss = Assets[sprite.sprite_sheet]
+  love.graphics.draw(ss.ss, 
+    sprite.quad, x - ss.size/2, y - ss.size/2)
 end
 
 function Graphics:PushColor(ctable)
@@ -30,7 +28,7 @@ end
 
 function Graphics:Print(t, x, y, s)
   s = s and s or 12
-  local f = Assets.Font[s]
+  local f = Assets.FONT[s]
 
   if f then
     love.graphics.setFont(f)
@@ -47,7 +45,7 @@ end
 
 function Graphics:PrintLeft(t, x, y, s)
   s = s and s or 12
-  local f = Assets.Font[s]
+  local f = Assets.FONT[s]
 
   if f then
     local textWidth = f:getWidth(t)
@@ -60,7 +58,7 @@ end
 
 function Graphics:PrintRight(t, x, y, s)
   s = s and s or 12
-  local f = Assets.Font[s]
+  local f = Assets.FONT[s]
 
   if f then
     local textWidth = f:getWidth(t)

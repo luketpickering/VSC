@@ -13,9 +13,6 @@ end
 -- Adds an item to the end of the buffer, replacing the current last item if the
 -- buffer is full
 function RingBuffer:Append(obj)
-  -- io.write(string.format("RingBuffer(S=%s, h=%s, t=%s, c=%s):Append:\n",
-  --   self:Size(), self.head, self.tail, self.capacity))
-  -- console.print(obj)
 
   -- advance the tail if we're not yet full
   if (self:Size() > 0) and not (self:Size() == self.capacity) then
@@ -25,23 +22,12 @@ function RingBuffer:Append(obj)
   local popped = self.buf[self.tail]
   self.buf[self.tail] = obj
 
-  if popped then
-    -- io.write(string.format("RingBuffer:Append -- Popped %s\n", self.tail))
-    -- console.print(popped)
-  end
-
-  -- io.write(string.format("RingBuffer(S=%s, h=%s, t=%s, c=%s):Appended @ %s\n",
-  --   self:Size(), self.head, self.tail, self.capacity, self.tail))
-
   return popped
 end
 
 -- Adds an item to the front of the buffer, replacing the current last item if 
 -- the buffer is full
 function RingBuffer:Prepend(obj)
-  -- io.write(string.format("RingBuffer(S=%s, h=%s, t=%s, c=%s):Prepend\n",
-  --   self:Size(), self.head, self.tail, self.capacity))
-  -- console.print(obj)
 
   local popped = nil
 
@@ -52,8 +38,6 @@ function RingBuffer:Prepend(obj)
     -- we need to pop the old tail element
     if self.head == self.tail then
       popped = self.buf[self.tail]
-      -- io.write(string.format("RingBuffer:v -- Popped %s\n", self.tail))
-      -- console.print(popped)
 
       self.tail = self:prev(self.tail)
     end
@@ -61,8 +45,6 @@ function RingBuffer:Prepend(obj)
 
   self.buf[self.head] = obj
 
-  -- io.write(string.format("RingBuffer(S=%s, h=%s, t=%s, c=%s):Prepended @ %s\n",
-  --   self:Size(), self.head, self.tail, self.capacity, self.head))
   return popped
 end
 
@@ -126,14 +108,10 @@ function RingBuffer:PopFront()
 end
 
 function RingBuffer:Peek()
-  -- io.write(string.format("RingBuffer(S=%s, h=%s, t=%s, c=%s) Peek\n",
-  --   self:Size(), self.head, self.tail, self.capacity, i, ip))
   return self.buf[self.tail]
 end
 
 function RingBuffer:PeekFront()
-  -- io.write(string.format("RingBuffer(S=%s, h=%s, t=%s, c=%s) PeekFront\n",
-  --   self:Size(), self.head, self.tail, self.capacity, i, ip))
   return self.buf[self.head]
 end
 

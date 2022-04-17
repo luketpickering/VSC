@@ -1,5 +1,5 @@
 require "entities/Character"
-require "entities/AI"
+require "AI/AI"
 
 local vector = require "hump/vector"
 

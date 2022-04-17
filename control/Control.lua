@@ -5,14 +5,13 @@ require "control/Joystick"
 require "control/Keyboard"
 
 ControlTypes = {
-  KEYBOARD = 1,
-  JOYSTICK = 2
+  KEYBOARD = 100001,
+  JOYSTICK = 100002
 }
 
-ControlTypes_rev = {
-  "KEYBOARD",
-  "JOYSTICK"
-}
+local ControlTypes_rev = { }
+ControlTypes_rev[100001] = "KEYBOARD"
+ControlTypes_rev[100002] = "JOYSTICK"
 
 function ControlTypes.tostring(type)
   return ControlTypes_rev[type]

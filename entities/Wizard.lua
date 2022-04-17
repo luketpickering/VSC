@@ -25,15 +25,3 @@ function Wizard:Command(command, value)
 
   end
 end
-
-function Wizard:Draw()
-  Character.Draw(self)
-
-  Graphics:PushColor({1,1,0})
-  love.graphics.points(self.body:getX(), self.body:getY())
-  love.graphics.rectangle("line",
-    self.body:getX() - Assets.size/2, self.body:getY() - Assets.size/2, 
-    Assets.size, Assets.size)
-  Graphics:PopColor()
-
-end 

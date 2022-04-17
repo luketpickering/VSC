@@ -4,22 +4,23 @@ require "utils/ringbuffer"
 local vector = require "hump/vector"
 
 DynamicBodyStates = {
-  ALIVE_RECORDING = 1,
-  ALIVE = 2,
-  REWINDING = 3,
-  DEAD = 4,
-  READY_FOR_GC = 5,
-  UNITINIALIZED = 6,
+  ALIVE_RECORDING = 11,
+  ALIVE = 12,
+  REWINDING = 13,
+  STUNNED = 14,
+  DEAD = 15,
+  READY_FOR_GC = 16,
+  UNITINIALIZED = 17,
 }
 
-DynamicBodyStates_rev = {
-  "UNITINIALIZED",
-  "ALIVE_RECORDING",
-  "ALIVE",
-  "REWINDING",
-  "DEAD",
-  "READY_FOR_GC",
-}
+local DynamicBodyStates_rev = { }
+DynamicBodyStates_rev[11] = "UNITINIALIZED"
+DynamicBodyStates_rev[12] = "ALIVE_RECORDING"
+DynamicBodyStates_rev[13] = "ALIVE"
+DynamicBodyStates_rev[14] = "STUNNED"
+DynamicBodyStates_rev[15] = "REWINDING"
+DynamicBodyStates_rev[16] = "DEAD"
+DynamicBodyStates_rev[17] = "READY_FOR_GC"
 
 function DynamicBodyStates.tostring(state)
   return DynamicBodyStates_rev[state]
@@ -48,6 +49,7 @@ DynamicBody = Object:new{}
 function DynamicBody:init(body)
   assert(body)
   self.body = body
+  self.body:setLinearDamping(0.05)
 
   self.state = DynamicBodyStates.UNITINIALIZED
   self.next_state = nil
