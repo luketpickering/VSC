@@ -3,27 +3,30 @@ require "AI/AI"
 
 local vector = require "hump/vector"
 
-Baddie = Character:new { 
-  maxVel = 40,
-}
-
-function Baddie:Command(command, value)
-
-  if self.state < DynamicBodyStates.READY_FOR_GC then
-    
-    if (command == AICommands.NOTIFY_TARGET) 
-      and (self.state == DynamicBodyStates.ALIVE_RECORDING) then
-      self.body:setLinearVelocity( (value * self.maxVel):unpack() )
-    elseif command == Commands.REWIND then
-      self.next_state = (value > 0) and 
-            DynamicBodyStates.REWINDING or
-            DynamicBodyStates.ALIVE_RECORDING
-    end
-
+local Baddie_ALIVE = {}
+function Baddie_ALIVE.Command(self, command, value)
+  if command == AICommands.NOTIFY_TARGET then
+    self.MOVE_vector = value
+  elseif (command == Commands.REWIND) and (value > 0) then
+    self.next_state = DynamicBodyStates.REWINDING
+    self.MOVE_vector = vector()
   end
-
 end
 
-function Baddie:Draw()
-  Character.Draw(self)
-end 
+function Baddie_ALIVE.Update(self, dt)
+  local delta_control_vector = self.MOVE_vector 
+    - self:GetVel()/self.control_velocity
+  self.body:applyLinearImpulse( 
+    (delta_control_vector * self.control_velocity):unpack() )
+end
+
+Baddie = Character:new{}
+function Baddie:init(...)
+  Character.init(self, ...)
+
+  self.control_velocity = 30
+  self.stunned_time = 1.25
+
+  self.FSM[DynamicBodyStates.ALIVE] = Baddie_ALIVE
+
+end

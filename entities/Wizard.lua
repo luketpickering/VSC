@@ -6,22 +6,30 @@ require "graphics/Graphics"
 
 require "utils/console"
 
-Wizard = Character:new { 
-  maxVel = 50,
-}
-
-function Wizard:Command(command, value)
-
-  if self.state < DynamicBodyStates.READY_FOR_GC then
-    
-    if (command == Commands.MOVE) 
-      and (self.state == DynamicBodyStates.ALIVE_RECORDING) then
-      self.body:setLinearVelocity( (value * self.maxVel):unpack() )
-    elseif command == Commands.REWIND then
-      self.next_state = (value > 0) and 
-            DynamicBodyStates.REWINDING or
-            DynamicBodyStates.ALIVE_RECORDING
-    end
-
+local Wizard_ALIVE = {}
+function Wizard_ALIVE.Command(self, command, value)
+  if (command == Commands.MOVE) then
+    self.MOVE_vector = value
+  elseif (command == Commands.REWIND) and (value > 0) then
+    self.next_state = DynamicBodyStates.REWINDING
   end
+end
+
+function Wizard_ALIVE.Update(self, dt)
+  local delta_control_vector = self.MOVE_vector 
+    - self:GetVel()/self.control_velocity
+  self.body:applyLinearImpulse( 
+    (delta_control_vector * self.control_velocity):unpack() )
+end
+
+Wizard = Character:new{}
+function Wizard:init(...)
+  Character.init(self, ...)
+
+  self.Resistances[DamageTypes.PHYSICAL] = 1.5
+
+  self.control_velocity = 40
+
+  self.FSM[DynamicBodyStates.ALIVE] = Wizard_ALIVE
+
 end

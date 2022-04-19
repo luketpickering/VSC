@@ -76,3 +76,7 @@ end
 function Camera:Detach()
   self.cam:detach()
 end
+
+function Camera:RotateTo(phi)
+  self.cam:rotateTo(phi)
+end

@@ -21,17 +21,19 @@ Engine = Object:new{
 }
 
 function NotifyBeginContact(a,b,c)
-  console.print("Collision: ")
-  console.print(a)
-  console.print(b)
-  console.print(c)
-end
+  a:getBody():applyLinearImpulse((vector(c:getNormal())*-50):unpack())
+  b:getBody():applyLinearImpulse((vector(c:getNormal())*50):unpack())
 
-function NotifyPreSolve(a,b,c)
-  console.print("NotifyPreSolve")
-end
-function NotifyPostSolve(a,b,c)
-  console.print("NotifyPostSolve")
+  local achar = a:getUserData()
+  local bchar = b:getUserData()
+
+  achar:Hurt(10)
+  bchar:Hurt(10)
+
+  achar.state = DynamicBodyStates.STUNNED
+  achar.STUNNED_timer = achar.stunned_time
+  bchar.state = DynamicBodyStates.STUNNED
+  bchar.STUNNED_timer = bchar.stunned_time
 end
 
 function Engine:init()
@@ -40,7 +42,7 @@ function Engine:init()
 
   self.World = love.physics.newWorld()
 
-  self.World:setCallbacks(NotifyBeginContact, nil, NotifyPreSolve,NotifyPostSolve)
+  self.World:setCallbacks(NotifyBeginContact)
 
   self.window = {}
   self.window.width, self.window.height, self.window.flags = love.window.getMode()
@@ -57,12 +59,10 @@ function Engine:init()
     self.Baddies[i]:init(self.World, 
       Assets:GetSprite("KENNEY_SPRITES", 25, 0),
       vector.randomDirection(100,200))
-    self.Baddies[i].next_state = DynamicBodyStates.ALIVE_RECORDING
     AI:Attach(self.Baddies[i])
   end 
 
   Wizard:init(self.World, Assets:GetSprite("KENNEY_SPRITES",25, 4))
-  Wizard.next_state = DynamicBodyStates.ALIVE_RECORDING
 
   Camera:init(Wizard:GetPos(), self.sprite_scale)
 
@@ -129,6 +129,8 @@ function love.draw()
   for _,b in ipairs(Engine.Baddies) do
     dbg.character.Draw(b, Camera)
   end
+
+  dbg.camera.Draw(Camera)
 
   Graphics:PrintRight(string.format("Input: %s", ControlTypes.tostring(Control.itype)), 
     Engine.window.width - 20, 20)

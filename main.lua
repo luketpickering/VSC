@@ -1,3 +1,5 @@
+require "utils/polyfills"
+
 require "engine/Engine"
 
 require "tests/tests"

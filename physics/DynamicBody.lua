@@ -4,23 +4,21 @@ require "utils/ringbuffer"
 local vector = require "hump/vector"
 
 DynamicBodyStates = {
-  ALIVE_RECORDING = 11,
-  ALIVE = 12,
+  ALIVE = 11,
+  STUNNED = 12,
   REWINDING = 13,
-  STUNNED = 14,
-  DEAD = 15,
-  READY_FOR_GC = 16,
-  UNITINIALIZED = 17,
+  DEAD = 14,
+  READY_FOR_GC = 15,
+  UNITINIALIZED = 16,
 }
 
 local DynamicBodyStates_rev = { }
-DynamicBodyStates_rev[11] = "UNITINIALIZED"
-DynamicBodyStates_rev[12] = "ALIVE_RECORDING"
-DynamicBodyStates_rev[13] = "ALIVE"
-DynamicBodyStates_rev[14] = "STUNNED"
-DynamicBodyStates_rev[15] = "REWINDING"
-DynamicBodyStates_rev[16] = "DEAD"
-DynamicBodyStates_rev[17] = "READY_FOR_GC"
+DynamicBodyStates_rev[11] = "ALIVE"
+DynamicBodyStates_rev[12] = "STUNNED"
+DynamicBodyStates_rev[13] = "REWINDING"
+DynamicBodyStates_rev[14] = "DEAD"
+DynamicBodyStates_rev[15] = "READY_FOR_GC"
+DynamicBodyStates_rev[16] = "UNITINIALIZED"
 
 function DynamicBodyStates.tostring(state)
   return DynamicBodyStates_rev[state]
@@ -43,13 +41,13 @@ function DynamicBodySnapshot:Interpolate(fraction, other_state)
 end
 
 local MAX_REWIND_SPEED = 5
+local DEAD_TIME_LIMIT = 30
 
 DynamicBody = Object:new{}
 
 function DynamicBody:init(body)
   assert(body)
   self.body = body
-  self.body:setLinearDamping(0.05)
 
   self.state = DynamicBodyStates.UNITINIALIZED
   self.next_state = nil
@@ -65,6 +63,8 @@ function DynamicBody:init(body)
 
   self.coarse_state_history = RingBuffer:new{}
   self.coarse_state_history:init(240)
+
+  self.FSM = {}
 end
 
 function DynamicBody:RevertToSnapshot(state)
@@ -166,7 +166,7 @@ function DynamicBody:RewindFineState(dt)
 end
 
 function DynamicBody:Update(dt)
-  if self.state == DynamicBodyStates.ALIVE_RECORDING then
+  if self.state <= DynamicBodyStates.STUNNED then
     self:RecordFineState(dt)
   elseif self.state == DynamicBodyStates.REWINDING then
 
@@ -215,7 +215,7 @@ function DynamicBody:TransitionState()
     self.body:setActive(false)
   end
 
-  if self.next_state == DynamicBodyStates.ALIVE_RECORDING then
+  if self.next_state == DynamicBodyStates.ALIVE then
     self.body:setActive(true)
   end
 
@@ -224,8 +224,21 @@ function DynamicBody:TransitionState()
     self.body:setActive(false)
   end
 
+  print("STATE Transition: ", 
+    DynamicBodyStates.tostring(self.state), 
+    "->", 
+    DynamicBodyStates.tostring(self.next_state))
+
+  if self.FSM[self.state] and self.FSM[self.state].Exit then
+    self.FSM[self.state].Exit(self)
+  end
+
   self.state = self.next_state
   self.next_state = nil
+
+  if self.FSM[self.state] and self.FSM[self.state].Enter then
+    self.FSM[self.state].Enter(self)
+  end
 end
 
 function DynamicBody:GetPos()
