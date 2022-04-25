@@ -7,6 +7,7 @@ require "graphics/Camera"
 require "graphics/Background"
 
 require "control/Control"
+require "AI/AI"
 
 require "entities/Wizard"
 require "entities/Baddie"
@@ -21,20 +22,21 @@ Engine = Object:new{
 }
 
 function NotifyBeginContact(a,b,c)
-  a:getBody():applyLinearImpulse((vector(c:getNormal())*-50):unpack())
-  b:getBody():applyLinearImpulse((vector(c:getNormal())*50):unpack())
-
   local achar = a:getUserData()
   local bchar = b:getUserData()
 
+  print(string.format("Begin new contact between %s and %s in frame %s", 
+    achar.name, bchar.name, framectr))
+
   achar:Hurt(10)
   bchar:Hurt(10)
-
-  achar.state = DynamicBodyStates.STUNNED
-  achar.STUNNED_timer = achar.stunned_time
-  bchar.state = DynamicBodyStates.STUNNED
-  bchar.STUNNED_timer = bchar.stunned_time
+  achar:Stun(5)
+  bchar:Stun(5)
+  achar:Shove(vector(c:getNormal())*-200)
+  bchar:Shove(vector(c:getNormal())*200)
 end
+
+framectr = 0
 
 function Engine:init()
 
@@ -56,20 +58,20 @@ function Engine:init()
 
   for i = 1, 1 do
     self.Baddies[i] = Baddie:new{}
-    self.Baddies[i]:init(self.World, 
+    self.Baddies[i]:init(
       Assets:GetSprite("KENNEY_SPRITES", 25, 0),
+      self.World, 
       vector.randomDirection(100,200))
     AI:Attach(self.Baddies[i])
   end 
 
-  Wizard:init(self.World, Assets:GetSprite("KENNEY_SPRITES",25, 4))
+  Wizard:init(Assets:GetSprite("KENNEY_SPRITES",25, 4), self.World)
 
   Camera:init(Wizard:GetPos(), self.sprite_scale)
 
   Control:Register(Wizard, {Commands.MOVE, Commands.REWIND} )
   Control:Register(kb, {Commands.MOVE, Commands.REWIND,
                         Commands.MOVE_CAMERA, Commands.ZOOM} )
-  Control:Register(AI, {Commands.REWIND} )
 
   Control:Register(Camera, {Commands.MOVE_CAMERA, Commands.ZOOM})
   Control:Register(dbg.input, Commands.ANY)
@@ -86,12 +88,19 @@ function Engine:Update(dt)
 
   AI:Update(Wizard)
   for _,b in ipairs(self.Baddies) do
+    -- we force other actors to rewind if the player is
+    if Wizard.BeganRewind then
+      b.next_state = ActorStates.REWINDING
+    elseif Wizard.FinishedRewind then
+      b.next_state = ActorStates.POST_REWIND
+    end
     b:Update(dt)
   end
 end
 
 function love.update(dt)
   Engine:Update(dt)
+  framectr = framectr + 1
 end
 
 function Engine:pxtom(px)
@@ -141,8 +150,8 @@ function love.draw()
 
   love.graphics.rectangle("fill", 20, Engine.window.height - 40, 
     (Engine.window.width * 0.8) * 
-      Wizard.fine_state_history:Size() /
-        Wizard.fine_state_history.capacity, 
+      Wizard.fine_snap_history:Size() /
+        Wizard.fine_snap_history.capacity, 
     5)
 
   Graphics:PopColor()
@@ -152,8 +161,8 @@ function love.draw()
 
   love.graphics.rectangle("fill", 20, Engine.window.height - 20, 
     (Engine.window.width * 0.8) * 
-      Wizard.coarse_state_history:Size() /
-        Wizard.coarse_state_history.capacity, 
+      Wizard.coarse_snap_history:Size() /
+        Wizard.coarse_snap_history.capacity, 
     5)
   Graphics:PopColor()
 

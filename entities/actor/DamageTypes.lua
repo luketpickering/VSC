@@ -8,5 +8,5 @@ DamageTypes_rev[1] = "PHYSICAL"
 DamageTypes_rev[2] = "MAGIC"
 
 function DamageTypes.tostring(dtype)
-  return DamageTypes_rev[com]
+  return DamageTypes_rev[dtype]
 end
